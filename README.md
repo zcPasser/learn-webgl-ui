@@ -1,5 +1,31 @@
-# Vue 3 + TypeScript + Vite
+# Learn WebGL UI
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+> 一个用于记录 WebGL 学习过程的项目，基于 Three.js 和 Shader 编程。
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 📚 技术栈
+
+- **框架**: Vue 3 + TypeScript
+- **UI 组件库**: Element Plus
+- **3D 引擎**: Three.js
+- **构建工具**: Vite
+- **包管理器**: pnpm
+- **代码规范**: ESLint + Prettier + Husky + Commitlint
+- **Shader 支持**: vite-plugin-glsl
+
+## 🚀 环境要求
+
+- Node.js >= 18.0.0
+- pnpm >= 8.0.0
+
+## 📦 快速开始
+
+### 安装依赖
+
+```bash
+# 克隆项目
+git clone https://gitee.com/malu1486991775/learn-webgl-ui.git
+cd learn-webgl-ui
+
+# 安装依赖
+pnpm install
+```
