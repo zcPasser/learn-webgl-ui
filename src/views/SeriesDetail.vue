@@ -45,7 +45,7 @@ const openNote = (link: string) => {
 }
 
 const goToDemo = (link: string) => {
-  router.push(link)
+  window.open(link, '_blank')
 }
 </script>
 
