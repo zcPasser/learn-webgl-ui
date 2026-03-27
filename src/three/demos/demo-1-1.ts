@@ -70,14 +70,39 @@ export default {
      */
     const orbitalControls = new OrbitControls(camera, renderer.domElement)
     /*
+     * Resize
+     */
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight
+      renderer.setSize(container.clientWidth, container.clientHeight)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      orbitalControls.update()
+    })
+    /*
+     * Cylinder
+     */
+    const center = cylinder.position.clone()
+    const radius = 2
+    const speed = 0.005
+
+    const scaleSpeed = 0.005
+    const scaleRange = 1
+    const scaleCenter = 1.5
+    /*
      * Animate
      */
     const animate = (currentTime: number) => {
       const elapsedTime = currentTime - startTime
 
       cube.rotation.x += 0.02
+      const angle = elapsedTime * speed
+      cylinder.position.x = center.x
+      cylinder.position.z = center.z + radius * Math.sin(angle)
+      cylinder.position.y = center.y + radius * Math.cos(angle)
       // cylinder.rotation.z += Math.sin(elapsedTime) + 1
       // cone.rotation.y += Math.sin(elapsedTime) * 0.5
+      cone.scale.y =
+        scaleCenter + (Math.sin(elapsedTime * scaleSpeed) * scaleRange) / 2
 
       orbitalControls.update()
 
