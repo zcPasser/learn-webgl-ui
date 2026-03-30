@@ -72,12 +72,13 @@ export default {
     /*
      * Resize
      */
-    window.addEventListener('resize', () => {
+    const handleResize = () => {
       camera.aspect = container.clientWidth / container.clientHeight
       renderer.setSize(container.clientWidth, container.clientHeight)
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       orbitalControls.update()
-    })
+    }
+    window.addEventListener('resize', handleResize)
     /*
      * Cylinder
      */
@@ -88,9 +89,54 @@ export default {
     const scaleSpeed = 0.005
     const scaleRange = 1
     const scaleCenter = 1.5
+
+    /*
+     * Memory Monitor
+     */
+    let memoryMonitorInterval: number | null = null
+    const memoryMonitorElement = document.createElement('div')
+    memoryMonitorElement.style.position = 'absolute'
+    memoryMonitorElement.style.top = '10px'
+    memoryMonitorElement.style.left = '10px'
+    memoryMonitorElement.style.padding = '10px'
+    memoryMonitorElement.style.background = 'rgba(0, 0, 0, 0.7)'
+    memoryMonitorElement.style.color = '#fff'
+    memoryMonitorElement.style.borderRadius = '5px'
+    memoryMonitorElement.style.fontFamily = 'monospace'
+    memoryMonitorElement.style.fontSize = '12px'
+    memoryMonitorElement.style.zIndex = '1000'
+    container.appendChild(memoryMonitorElement)
+
+    const updateMemoryInfo = () => {
+      if (performance && performance.memory) {
+        const memory = performance.memory
+        const usedJSHeapSize = (memory.usedJSHeapSize / 1048576).toFixed(2)
+        const totalJSHeapSize = (memory.totalJSHeapSize / 1048576).toFixed(2)
+        const jsHeapSizeLimit = (memory.jsHeapSizeLimit / 1048576).toFixed(2)
+
+        memoryMonitorElement.innerHTML = `
+          <div>内存监控:</div>
+          <div>已使用: ${usedJSHeapSize} MB</div>
+          <div>总分配: ${totalJSHeapSize} MB</div>
+          <div>限制: ${jsHeapSizeLimit} MB</div>
+          <div>使用率: ${((memory.usedJSHeapSize / memory.jsHeapSizeLimit) * 100).toFixed(2)}%</div>
+        `
+      } else {
+        memoryMonitorElement.innerHTML =
+          '<div>当前浏览器不支持内存监控API</div>'
+      }
+    }
+
+    // 初始化内存信息
+    updateMemoryInfo()
+
+    // 每秒更新一次内存信息
+    memoryMonitorInterval = window.setInterval(updateMemoryInfo, 1000)
+
     /*
      * Animate
      */
+    let animationId: number
     const animate = (currentTime: number) => {
       const elapsedTime = currentTime - startTime
 
@@ -108,16 +154,50 @@ export default {
 
       renderer.render(scene, camera)
 
-      requestAnimationFrame(animate)
+      animationId = requestAnimationFrame(animate)
     }
 
     const startTime = Date.now()
+    animate(startTime)
+
+    const dispose = () => {
+      // 清理几何体
+      cubeGeometry.dispose()
+      cylinderGeometry.dispose()
+      ConeGeometry.dispose()
+
+      // 清理材质
+      cubeMaterial.dispose()
+      cylinderMaterial.dispose()
+      coneMaterial.dispose()
+
+      // 清理控制器
+      orbitalControls.dispose()
+
+      // 清理渲染器
+      renderer.dispose()
+
+      // 移除事件监听
+      window.removeEventListener('resize', handleResize)
+
+      // 取消动画
+      cancelAnimationFrame(animationId)
+
+      // 清理内存监控
+      if (memoryMonitorInterval) {
+        clearInterval(memoryMonitorInterval)
+      }
+      if (memoryMonitorElement && memoryMonitorElement.parentNode) {
+        memoryMonitorElement.parentNode.removeChild(memoryMonitorElement)
+      }
+    }
 
     return {
       scene,
       camera,
       renderer,
-      animate
+      animate,
+      dispose
     }
   }
 } as DemoModule

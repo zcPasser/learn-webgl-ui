@@ -22,9 +22,19 @@ export const seriesList: Series[] = [
       {
         id: '1-1',
         title: '几何体变换',
-        content: '使用自定义 Shader 材质创建渐变效果的旋转立方体',
+        content:
+          '多种几何体，具备不同颜色，实现旋转、缩放、位移动画，添加键盘控制来改变材质线框参数',
         noteLink: 'https://www.yuque.com/passer-l28xu/pf100o/rku2e2lvwc7wlkwi',
         demoLink: '/demo/1-1'
+      },
+      {
+        id: '1-2',
+        title: '光照实验',
+        content:
+          '多种光源，多种材质，光源位置动态变化，实现阴影效果，添加 GUI 控制光照参数',
+        noteLink:
+          'https://www.yuque.com/passer-l28xu/pf100o/kno0aksw7rxig6z8/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
+        demoLink: '/demo/1-2'
       }
     ]
   },
