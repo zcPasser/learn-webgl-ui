@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
+import { createPlainText } from '../utils/textUtil.js'
 
 export default {
   title: '光照实验',
@@ -15,7 +16,6 @@ export default {
      * Scene
      */
     const scene = new THREE.Scene()
-
     /*
      * Camera
      */
@@ -41,7 +41,6 @@ export default {
     camera2.position.set(0, 20, 20)
     camera2.lookAt(0, 0, 0)
     scene.add(camera2)
-
     /*
      * Renderer
      */
@@ -53,7 +52,6 @@ export default {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     container.appendChild(renderer.domElement)
-
     /*
      * Controls
      */
@@ -62,6 +60,35 @@ export default {
       renderer.domElement
     )
     controls.enableDamping = true
+    /*
+     * Text Label
+     */
+    const createTextLabel = (text: string) => {
+      const canvas = createPlainText(text)
+
+      // 创建纹理
+      const texture = new THREE.CanvasTexture(canvas)
+      texture.minFilter = THREE.LinearFilter
+      texture.magFilter = THREE.LinearFilter
+      texture.needsUpdate = true
+
+      canvas.remove()
+
+      // 创建材质
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true
+      })
+
+      // 创建精灵
+      const sprite = new THREE.Sprite(material)
+
+      const aspect = canvas.width / canvas.height
+      const baseScale = 1
+      sprite.scale.set(aspect * baseScale, baseScale, 1) // 调整大小
+
+      return sprite
+    }
     /*
      * Mesh
      */
@@ -81,10 +108,19 @@ export default {
     const sphereMaterial2 = new THREE.MeshStandardMaterial({
       color: 0xff0000
     })
+    /*
+     * Group1
+     */
+    const label1 = createTextLabel('LambertMaterial')
     const sphere1 = new THREE.Mesh(sphereGeometry, sphereMaterial1)
-    scene.add(sphere1)
+    const group1 = new THREE.Group()
+    group1.add(label1)
+    group1.add(sphere1)
+    scene.add(group1)
+    label1.position.set(0, 3, 0)
     sphere1.position.set(0, 1.2, 0)
     sphere1.castShadow = true
+
     const sphere2 = new THREE.Mesh(sphereGeometry, sphereMaterial2)
     scene.add(sphere2)
     sphere2.position.set(3, 1.2, 0)
