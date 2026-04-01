@@ -21,12 +21,12 @@ export default {
      */
     const aspect = container.clientWidth / container.clientHeight
     const camera = new THREE.PerspectiveCamera(
-      20,
+      45,
       container.clientWidth / container.clientHeight,
       2.2,
       18
     )
-    camera.position.set(-0.05, 2.9, 11.75)
+    camera.position.set(-0.05, 2.9, 12.12)
     camera.rotation.x = -0.241
     scene.add(camera)
     const frustumSize = 12
@@ -51,6 +51,7 @@ export default {
     renderer.setSize(container.clientWidth, container.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
     container.appendChild(renderer.domElement)
 
     /*
@@ -64,7 +65,7 @@ export default {
     /*
      * Mesh
      */
-    const groundGeometry = new THREE.PlaneGeometry(10, 10)
+    const groundGeometry = new THREE.PlaneGeometry(100, 100)
     const groundMaterial = new THREE.MeshLambertMaterial({
       color: 0x585050,
       side: THREE.DoubleSide
@@ -72,7 +73,8 @@ export default {
     const ground = new THREE.Mesh(groundGeometry, groundMaterial)
     ground.rotation.x = -Math.PI / 2
     scene.add(ground)
-    const sphereGeometry = new THREE.SphereGeometry(1, 10, 10)
+    ground.receiveShadow = true
+    const sphereGeometry = new THREE.SphereGeometry(1, 32, 32)
     const sphereMaterial1 = new THREE.MeshLambertMaterial({
       color: 0x00ff00
     })
@@ -81,26 +83,43 @@ export default {
     })
     const sphere1 = new THREE.Mesh(sphereGeometry, sphereMaterial1)
     scene.add(sphere1)
+    sphere1.position.set(0, 1.2, 0)
+    sphere1.castShadow = true
     const sphere2 = new THREE.Mesh(sphereGeometry, sphereMaterial2)
     scene.add(sphere2)
+    sphere2.position.set(3, 1.2, 0)
+    sphere2.castShadow = true
+    const sphere3 = new THREE.Mesh(sphereGeometry, sphereMaterial2)
+    scene.add(sphere3)
+    sphere3.position.set(-3, 1.2, 0)
     /*
      * Light
      */
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
     scene.add(ambientLight)
-    // const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
-    // directionalLight.position.set(1, 1, 1)
-    // scene.add(directionalLight)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1)
+    directionalLight.position.set(1, 3, -2)
+    scene.add(directionalLight)
+    directionalLight.castShadow = true
 
     /*
      * Helper
      */
     let cameraHelper: THREE.CameraHelper | undefined
     if (debugConfig.useCamera2) {
-      cameraHelper = new THREE.CameraHelper(camera2)
+      cameraHelper = new THREE.CameraHelper(camera)
       scene.add(cameraHelper)
       // cameraHelper.visible = true
     }
+    const directionalLightHelper = new THREE.DirectionalLightHelper(
+      directionalLight,
+      1
+    )
+    scene.add(directionalLightHelper)
+    const directionalLightShadowHelper = new THREE.CameraHelper(
+      directionalLight.shadow.camera
+    )
+    scene.add(directionalLightShadowHelper)
     const axesHelper = new THREE.AxesHelper(5)
     scene.add(axesHelper)
 
@@ -137,18 +156,21 @@ export default {
       .name('视场角 FOV')
       .onChange(() => {
         camera.updateProjectionMatrix() // 必须更新投影矩阵
+        cameraHelper && (cameraHelper.visible = true)
       })
     cameraFolder
       .add(camera, 'near', 0.1, 10, 0.1)
       .name('近裁切面')
       .onChange(() => {
         camera.updateProjectionMatrix()
+        cameraHelper && (cameraHelper.visible = true)
       })
     cameraFolder
       .add(camera, 'far', 10, 200, 1)
       .name('远裁切面')
       .onChange(() => {
         camera.updateProjectionMatrix()
+        cameraHelper && (cameraHelper.visible = true)
       })
     cameraFolder.close()
 
