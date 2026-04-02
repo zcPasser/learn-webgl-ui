@@ -108,26 +108,66 @@ export default {
     const sphereMaterial2 = new THREE.MeshStandardMaterial({
       color: 0xff0000
     })
+    const sphereMaterial3 = new THREE.MeshPhongMaterial({
+      color: 0x0000ff
+    })
+    const sphereMaterial4 = new THREE.MeshPhysicalMaterial({
+      color: 0x00ffff
+    })
     /*
      * Group1
      */
-    const label1 = createTextLabel('LambertMaterial')
+    const label1 = createTextLabel('sphere1 LambertMaterial')
     const sphere1 = new THREE.Mesh(sphereGeometry, sphereMaterial1)
     const group1 = new THREE.Group()
     group1.add(label1)
     group1.add(sphere1)
     scene.add(group1)
-    label1.position.set(0, 3, 0)
-    sphere1.position.set(0, 1.2, 0)
+    group1.position.set(0, 1.1, 0)
+    label1.position.set(0, 1.5, 0)
+    sphere1.position.set(0, 0, 0)
     sphere1.castShadow = true
-
+    /*
+     * Group2
+     */
+    const label2 = createTextLabel('sphere2 StandardMaterial')
     const sphere2 = new THREE.Mesh(sphereGeometry, sphereMaterial2)
-    scene.add(sphere2)
-    sphere2.position.set(3, 1.2, 0)
+    const group2 = new THREE.Group()
+    group2.add(label2)
+    group2.add(sphere2)
+    scene.add(group2)
+    group2.position.set(3, 1.1, 0)
+    label2.position.set(0, 1.5, 0)
+    sphere2.position.set(0, 0, 0)
     sphere2.castShadow = true
-    const sphere3 = new THREE.Mesh(sphereGeometry, sphereMaterial2)
-    scene.add(sphere3)
-    sphere3.position.set(-3, 1.2, 0)
+    /*
+     * Group3
+     */
+    const label3 = createTextLabel('sphere3 PhongMaterial')
+    const sphere3 = new THREE.Mesh(sphereGeometry, sphereMaterial3)
+    const group3 = new THREE.Group()
+    group3.add(label3)
+    group3.add(sphere3)
+    scene.add(group3)
+    group3.position.set(-3, 1.1, 0)
+    label3.position.set(0, 1.5, 0)
+    label3.rotation.x = Math.PI / 2
+    sphere3.position.set(0, 0, 0)
+    sphere3.castShadow = true
+    /*
+     * Group4
+     */
+    const label4 = createTextLabel('sphere4 PhongMaterial')
+    const sphere4 = new THREE.Mesh(sphereGeometry, sphereMaterial4)
+    const group4 = new THREE.Group()
+    group4.add(label4)
+    group4.add(sphere4)
+    scene.add(group4)
+    group4.position.set(0, 1.1, 3)
+    label4.position.set(0, 1.5, 0)
+    sphere4.position.set(0, 0, 0)
+    sphere4.castShadow = true
+
     /*
      * Light
      */
@@ -137,6 +177,22 @@ export default {
     directionalLight.position.set(1, 3, -2)
     scene.add(directionalLight)
     directionalLight.castShadow = true
+    /*
+     * Bulb
+     */
+    const bulbGeometry = new THREE.SphereGeometry(0.2, 16, 16)
+    const bulbMaterial = new THREE.MeshLambertMaterial({
+      color: 0xff0000,
+      transparent: true,
+      opacity: 0.8
+    })
+    const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial)
+    scene.add(bulb)
+    bulb.position.set(4, 3, -2)
+    const pointLight = new THREE.PointLight(0xffffff, 5)
+    pointLight.position.set(4, 3, -2)
+    bulb.add(pointLight)
+    pointLight.castShadow = true
 
     /*
      * Helper
@@ -155,7 +211,13 @@ export default {
     const directionalLightShadowHelper = new THREE.CameraHelper(
       directionalLight.shadow.camera
     )
-    scene.add(directionalLightShadowHelper)
+    // scene.add(directionalLightShadowHelper)
+    const pointLightHelper = new THREE.PointLightHelper(pointLight, 1)
+    scene.add(pointLightHelper)
+    const pointLightShadowHelper = new THREE.CameraHelper(
+      pointLight.shadow.camera
+    )
+    // scene.add(pointLightShadowHelper)
     const axesHelper = new THREE.AxesHelper(5)
     scene.add(axesHelper)
 
