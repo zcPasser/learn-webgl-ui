@@ -35,6 +35,14 @@ export const seriesList: Series[] = [
         noteLink:
           'https://www.yuque.com/passer-l28xu/pf100o/kno0aksw7rxig6z8/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
         demoLink: '/demo/1-2'
+      },
+      {
+        id: '1-3',
+        title: '相机控制',
+        content: '第一人称相机控制，跟随控制，平滑过渡，漫游控制',
+        noteLink:
+          'https://www.yuque.com/passer-l28xu/pf100o/egr16asrgk2lyhsu/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
+        demoLink: '/demo/1-3'
       }
     ]
   },
