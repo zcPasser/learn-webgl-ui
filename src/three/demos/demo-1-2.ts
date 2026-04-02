@@ -13,6 +13,17 @@ export default {
       useCamera2: false
     }
     /*
+     * GUI Config
+     */
+    const guiConfig = {
+      bulbLight: {
+        lightIntensity: 10,
+        emissiveIntensity: 10,
+        speed: 0.001,
+        lightColor: 0xffee88
+      }
+    }
+    /*
      * Scene
      */
     const scene = new THREE.Scene()
@@ -157,7 +168,7 @@ export default {
     /*
      * Group4
      */
-    const label4 = createTextLabel('sphere4 PhongMaterial')
+    const label4 = createTextLabel('sphere4 MeshPhysicalMaterial')
     const sphere4 = new THREE.Mesh(sphereGeometry, sphereMaterial4)
     const group4 = new THREE.Group()
     group4.add(label4)
@@ -177,22 +188,24 @@ export default {
     directionalLight.position.set(1, 3, -2)
     scene.add(directionalLight)
     directionalLight.castShadow = true
-    /*
-     * Bulb
-     */
+    // Bulb
     const bulbGeometry = new THREE.SphereGeometry(0.2, 16, 16)
-    const bulbMaterial = new THREE.MeshLambertMaterial({
-      color: 0xff0000,
-      transparent: true,
-      opacity: 0.8
+    const bulbLight = new THREE.PointLight(
+      guiConfig.bulbLight.lightColor,
+      guiConfig.bulbLight.lightIntensity,
+      500,
+      2
+    )
+
+    const bulbMat = new THREE.MeshStandardMaterial({
+      emissive: 0xffffee,
+      emissiveIntensity: guiConfig.bulbLight.emissiveIntensity,
+      color: 0x000000
     })
-    const bulb = new THREE.Mesh(bulbGeometry, bulbMaterial)
-    scene.add(bulb)
-    bulb.position.set(4, 3, -2)
-    const pointLight = new THREE.PointLight(0xffffff, 5)
-    pointLight.position.set(4, 3, -2)
-    bulb.add(pointLight)
-    pointLight.castShadow = true
+    bulbLight.add(new THREE.Mesh(bulbGeometry, bulbMat))
+    bulbLight.position.set(3, 2.1, -2)
+    bulbLight.castShadow = true
+    scene.add(bulbLight)
 
     /*
      * Helper
@@ -212,10 +225,10 @@ export default {
       directionalLight.shadow.camera
     )
     // scene.add(directionalLightShadowHelper)
-    const pointLightHelper = new THREE.PointLightHelper(pointLight, 1)
-    scene.add(pointLightHelper)
+    const pointLightHelper = new THREE.PointLightHelper(bulbLight, 1)
+    // scene.add(pointLightHelper)
     const pointLightShadowHelper = new THREE.CameraHelper(
-      pointLight.shadow.camera
+      bulbLight.shadow.camera
     )
     // scene.add(pointLightShadowHelper)
     const axesHelper = new THREE.AxesHelper(5)
@@ -224,8 +237,13 @@ export default {
     /*
      * Animation
      */
-    const animate = () => {
+    const animate = (elapsed: number) => {
       requestAnimationFrame(animate)
+
+      bulbLight.position.x = Math.cos(elapsed * guiConfig.bulbLight.speed) * 3
+      bulbLight.position.y =
+        Math.sin(elapsed * guiConfig.bulbLight.speed) * 3 + 3
+
       controls?.update()
       debugConfig.useCamera2 && cameraHelper?.update()
       renderer.render(scene, debugConfig.useCamera2 ? camera2 : camera)
@@ -235,6 +253,7 @@ export default {
      * GUI
      */
     const gui = new GUI()
+    // 相机
     const cameraFolder = gui.addFolder('相机')
     cameraFolder.add(camera.position, 'x', -15, 15, 0.01)
     cameraFolder.add(camera.position, 'y', -15, 15, 0.01)
@@ -271,6 +290,30 @@ export default {
         cameraHelper && (cameraHelper.visible = true)
       })
     cameraFolder.close()
+    // bulbLight
+    const bulbLightFolder = gui.addFolder('BulbLight')
+    bulbLightFolder
+      .add(guiConfig.bulbLight, 'lightIntensity', 0, 100, 0.1)
+      .onChange((value) => {
+        bulbLight.intensity = value
+      })
+    bulbLightFolder
+      .add(guiConfig.bulbLight, 'emissiveIntensity', 0, 100, 0.1)
+      .onChange((value) => {
+        bulbMat.emissiveIntensity = value
+      })
+    bulbLightFolder
+    bulbLightFolder
+      .add(guiConfig.bulbLight, 'speed', 0.001, 0.1, 0.001)
+      .onChange((value) => {
+        guiConfig.bulbLight.speed = value
+      })
+    bulbLightFolder
+      .addColor(guiConfig.bulbLight, 'lightColor')
+      .onChange((value) => {
+        bulbLight.color.set(value)
+      })
+    bulbLightFolder.close()
 
     console.log('scene', scene)
 
