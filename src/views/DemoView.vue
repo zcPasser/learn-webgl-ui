@@ -40,7 +40,7 @@ const initDemo = async () => {
     demoControls = await demoModule.setup(canvasContainer.value)
 
     if (demoControls?.animate) {
-      demoControls.animate(Date.now())
+      demoControls.animate()
     }
   } catch (err: any) {
     console.error('Demo 加载失败:', err)
