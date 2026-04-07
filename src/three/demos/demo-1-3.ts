@@ -35,7 +35,7 @@ export default {
       velocity: new THREE.Vector3(0, 0, 0),
       acceleration: 12,
       maxVelocity: 5,
-      damping: -0.04,
+      damping: -0.08,
       maxDegree: 150,
       minDegree: -150
     }
@@ -274,6 +274,7 @@ export default {
           targetState.velocity.add(
             left.multiplyScalar(targetState.acceleration * deltaTime)
           )
+          targetGroup.rotation.y += 1.5 * deltaTime
         }
         if (keyState.KeyD) {
           const front = new THREE.Vector3()
@@ -283,7 +284,9 @@ export default {
           targetState.velocity.add(
             right.multiplyScalar(targetState.acceleration * deltaTime)
           )
+          targetGroup.rotation.y -= 1.5 * deltaTime
         }
+        // cone.quaternion.copy(camera.quaternion)
       }
       // 阻尼
       targetState.velocity.addScaledVector(
