@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js'
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import { createInfoElement } from '../utils/infoUtil'
 import groundColorMap from '@/assets/sparse_grass/sparse_grass_diff_1k.jpg'
@@ -159,6 +160,9 @@ export default {
       <div>S: 后退</div>
       <div>A: 左转</div>
       <div>D: 右转</div>
+      <div>V: 切换视角模式(第一/第三)</div>
+      <div>鼠标点击锁定视角</div>
+      <div>ESC: 退出指针锁定</div>
     `
     const infoElement = createInfoElement(infoInnerHTML)
     container.appendChild(infoElement)
@@ -211,12 +215,25 @@ export default {
       // console.log('keyState', keyState)
     }
     window.addEventListener('keyup', handleKeyup)
+    const pointerLockControls = new PointerLockControls(
+      camera,
+      renderer.domElement
+    )
+    pointerLockControls.addEventListener('lock', () => {
+      console.log('pointerLockControls lock')
+      infoElement.style.display = 'none'
+    })
+    pointerLockControls.addEventListener('unlock', () => {
+      console.log('pointerLockControls unlock')
+      infoElement.style.display = 'block'
+    })
     let useRotation = false
     // const maxAngle = THREE.MathUtils.degToRad(targetState.maxDegree)
     // const minAngle = THREE.MathUtils.degToRad(targetState.minDegree)
     const maxAngle = -2.3218517113662562
     const minAngle = -maxAngle
     const handleMouseMove = (event: MouseEvent) => {
+      // if (pointerLockControls.isLocked) {
       if (useRotation) {
         event.preventDefault()
         targetGroup.rotation.y -= event.movementX / 600
@@ -231,6 +248,7 @@ export default {
         //   console.log('camera.rotation.x > maxAngle')
         // }
       }
+      // }
     }
     window.addEventListener('mousedown', () => {
       useRotation = true
