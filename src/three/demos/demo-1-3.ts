@@ -1,11 +1,9 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js'
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import { createInfoElement } from '../utils/infoUtil'
 import groundColorMap from '@/assets/sparse_grass/sparse_grass_diff_1k.jpg'
 import groundNormalMap from '@/assets/sparse_grass/sparse_grass_nor_gl_1k.jpg'
-import { velocity } from 'three/tsl'
 
 export default {
   title: '相机控制',
@@ -14,13 +12,10 @@ export default {
      * Debug Config
      */
     const debugConfig = {
-      useCamera2: false,
-      useControls: false
+      usedebugCamera: false,
+      useControls: false,
+      usePointerLock: false
     }
-    /*
-     * GUI Config
-     */
-    const guiConfig = {}
     /*
      * State
      */
@@ -33,9 +28,16 @@ export default {
     }
     // Target State
     const targetState = {
-      velocity: new THREE.Vector3(0, 0, 0),
-      acceleration: 12,
-      maxVelocity: 5,
+      velocity: new THREE.Vector3(0.5, 0.5, 0.5),
+      moveSpeed: 0,
+      rotationSpeed: 1,
+      maxMoveSpeed: 4.5,
+      maxRotationSpeed: 4.5,
+      baseMoveSpeed: 1,
+      baseRotationSpeed: 1,
+      baseMoveDirection: new THREE.Vector3(0, 1, 0),
+      viewMode: 'thirdPerson',
+      useMouse: false,
       damping: -0.08,
       maxDegree: 150,
       minDegree: -150
@@ -45,15 +47,6 @@ export default {
      * Scene + Camera + Renderer
      */
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      container.clientWidth / container.clientHeight,
-      0.1,
-      1000
-    )
-    // scene.add(camera)
-    // camera.position.set(0, 10, 15)
-    // camera.lookAt(0, 0, 0)
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(container.clientWidth, container.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -61,16 +54,16 @@ export default {
     /*
      * debugCamera
      */
-    let camera2: THREE.PerspectiveCamera | undefined
-    if (debugConfig.useCamera2) {
-      camera2 = new THREE.PerspectiveCamera(
+    let debugCamera: THREE.PerspectiveCamera | undefined
+    if (debugConfig.usedebugCamera) {
+      debugCamera = new THREE.PerspectiveCamera(
         75,
         container.clientWidth / container.clientHeight,
         0.1,
         1000
       )
-      camera2.position.set(0, 4, 15)
-      scene.add(camera2)
+      debugCamera.position.set(0, 4, 15)
+      scene.add(debugCamera)
     }
     /*
      * Mesh
@@ -133,9 +126,9 @@ export default {
     const torus = new THREE.Mesh(torusGeometry, torusMaterial)
     scene.add(torus)
     torus.position.set(0, 2, 10)
+    let dir = new THREE.Vector3()
+    torus.getWorldDirection(dir)
     // cone
-    const targetGroup = new THREE.Group()
-    scene.add(targetGroup)
     const coneGeometry = new THREE.ConeGeometry(1, 4, 32)
     const coneMaterial = new THREE.MeshStandardMaterial({
       color: 0xad4021,
@@ -143,14 +136,35 @@ export default {
       metalness: 0.1
     })
     const cone = new THREE.Mesh(coneGeometry, coneMaterial)
-    targetGroup.add(cone)
-    targetGroup.position.set(0, 2, -10)
+    /*
+     * Camera: Third Person Camera
+     */
+    // Third Person Camera
+    const thirdPersonGroup = new THREE.Group()
+    scene.add(thirdPersonGroup)
+    thirdPersonGroup.position.set(0, 2, -4)
+    thirdPersonGroup.add(cone)
     cone.position.set(0, 0, 0)
     cone.rotation.x = Math.PI / 2
-    // cone.rotation.y = -Math.PI / 2
-    targetGroup.add(camera)
-    camera.position.set(0, 4, -5)
-    camera.lookAt(0, 2, -10)
+    const thirdPersonCamera = new THREE.PerspectiveCamera(
+      80,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    )
+    thirdPersonGroup.add(thirdPersonCamera)
+    thirdPersonCamera.position.set(0, 5, -8)
+    thirdPersonCamera.lookAt(cone.position)
+    // First Person Camera
+    const firstPersonCamera = new THREE.PerspectiveCamera(
+      75,
+      container.clientWidth / container.clientHeight,
+      0.1,
+      1000
+    )
+    cone.add(firstPersonCamera)
+    firstPersonCamera.lookAt(targetState.baseMoveDirection)
+
     /*
      * Info
      */
@@ -161,8 +175,7 @@ export default {
       <div>A: 左转</div>
       <div>D: 右转</div>
       <div>V: 切换视角模式(第一/第三)</div>
-      <div>鼠标点击锁定视角</div>
-      <div>ESC: 退出指针锁定</div>
+      <div>左键：点击一次，可查看第三视角周围环境；<br/>再次点击，退出查看模式</div>
     `
     const infoElement = createInfoElement(infoInnerHTML)
     container.appendChild(infoElement)
@@ -180,7 +193,7 @@ export default {
     let controls: OrbitControls | undefined = undefined
     const createControls = () => {
       controls = new OrbitControls(
-        debugConfig.useCamera2 ? camera2! : camera,
+        debugConfig.usedebugCamera ? debugCamera! : thirdPersonCamera,
         renderer.domElement
       )
       controls.enableDamping = true
@@ -192,134 +205,106 @@ export default {
      * Event
      */
     const handleResize = () => {
-      camera.aspect = container.clientWidth / container.clientHeight
-      camera.updateProjectionMatrix()
+      thirdPersonCamera.aspect = container.clientWidth / container.clientHeight
+      thirdPersonCamera.updateProjectionMatrix()
       renderer.setSize(container.clientWidth, container.clientHeight)
     }
     window.addEventListener('resize', handleResize)
-    let useFirstView = true
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.code === 'KeyV') {
-        if (useFirstView) {
-          camera.position.z = 5
-        } else {
-          camera.position.z = -5
-        }
-        useFirstView = !useFirstView
+        targetState.viewMode =
+          targetState.viewMode === 'thirdPerson' ? 'firstPerson' : 'thirdPerson'
       } else keyState[event.code] = true
-      // console.log('keyState', keyState)
+      if (keyState.KeyS) {
+        const reverseQuaternion = new THREE.Quaternion().setFromAxisAngle(
+          targetState.baseMoveDirection,
+          Math.PI
+        )
+        cone.applyQuaternion(reverseQuaternion)
+      }
     }
     window.addEventListener('keydown', handleKeydown)
     const handleKeyup = (event: KeyboardEvent) => {
       keyState[event.code] = false
-      // console.log('keyState', keyState)
     }
     window.addEventListener('keyup', handleKeyup)
-    const pointerLockControls = new PointerLockControls(
-      camera,
-      renderer.domElement
-    )
-    pointerLockControls.addEventListener('lock', () => {
-      console.log('pointerLockControls lock')
-      infoElement.style.display = 'none'
-    })
-    pointerLockControls.addEventListener('unlock', () => {
-      console.log('pointerLockControls unlock')
-      infoElement.style.display = 'block'
-    })
-    let useRotation = false
-    // const maxAngle = THREE.MathUtils.degToRad(targetState.maxDegree)
-    // const minAngle = THREE.MathUtils.degToRad(targetState.minDegree)
-    const maxAngle = -2.3218517113662562
-    const minAngle = -maxAngle
+
     const handleMouseMove = (event: MouseEvent) => {
-      // if (pointerLockControls.isLocked) {
-      if (useRotation) {
-        event.preventDefault()
-        targetGroup.rotation.y -= event.movementX / 600
-        camera.rotation.x -= event.movementY / 600
-        console.log('camera.rotation.x', camera.rotation.x, minAngle, maxAngle)
-        // if (camera.rotation.x < minAngle) {
-        //   camera.rotation.x = minAngle
-        //   console.log('camera.rotation.x < minAngle')
-        // }
-        // if (camera.rotation.x > maxAngle) {
-        //   camera.rotation.x = maxAngle
-        //   console.log('camera.rotation.x > maxAngle')
-        // }
+      if (targetState.useMouse) {
+        thirdPersonCamera.rotation.y -= event.movementX / 600
+        thirdPersonCamera.rotation.x -= event.movementY / 600
+        return
       }
-      // }
     }
-    window.addEventListener('mousedown', () => {
-      useRotation = true
-    })
-    window.addEventListener('mouseup', () => {
-      useRotation = false
-    })
     window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('click', () => {
+      targetState.useMouse = !targetState.useMouse
+    })
     /*
      * Animation
      */
     let animationId: number | undefined = undefined
     let lastTime: number = 0
     const clock = new THREE.Clock()
+    let currentMoveDirection = targetState.baseMoveDirection.clone()
+    const currentQuaternion = new THREE.Quaternion()
     const animate = () => {
       const elapsedTime = clock.getElapsedTime()
       // console.log('elapsedTime', elapsedTime)
       const deltaTime = elapsedTime - lastTime
       lastTime = elapsedTime
 
-      if (targetState.velocity.length() < targetState.maxVelocity) {
-        if (keyState.KeyW) {
-          const front = new THREE.Vector3()
-          targetGroup.getWorldDirection(front)
-          targetState.velocity.add(
-            front.multiplyScalar(targetState.acceleration * deltaTime)
-          )
-        }
-        if (keyState.KeyS) {
-          const front = new THREE.Vector3()
-          targetGroup.getWorldDirection(front)
-          targetState.velocity.add(
-            front.multiplyScalar(-targetState.acceleration * deltaTime)
-          )
-        }
-        if (keyState.KeyA) {
-          const front = new THREE.Vector3()
-          targetGroup.getWorldDirection(front)
-          const up = new THREE.Vector3(0, 1, 0)
-          const left = up.clone().cross(front)
-          targetState.velocity.add(
-            left.multiplyScalar(targetState.acceleration * deltaTime)
-          )
-          targetGroup.rotation.y += 1.5 * deltaTime
-        }
-        if (keyState.KeyD) {
-          const front = new THREE.Vector3()
-          targetGroup.getWorldDirection(front)
-          const up = new THREE.Vector3(0, 1, 0)
-          const right = front.clone().cross(up)
-          targetState.velocity.add(
-            right.multiplyScalar(targetState.acceleration * deltaTime)
-          )
-          targetGroup.rotation.y -= 1.5 * deltaTime
-        }
-        // cone.quaternion.copy(camera.quaternion)
+      // if (targetState.velocity.length() < targetState.maxVelocity) {
+      if (keyState.KeyA) {
+        const angle = targetState.rotationSpeed * deltaTime
+        const rotationQuaternion = new THREE.Quaternion().setFromAxisAngle(
+          targetState.baseMoveDirection,
+          angle
+        )
+        cone.applyQuaternion(rotationQuaternion)
       }
-      // 阻尼
-      targetState.velocity.addScaledVector(
-        targetState.velocity,
-        targetState.damping
+      if (keyState.KeyD) {
+        const angle = -targetState.rotationSpeed * deltaTime
+        const rotationQuaternion = new THREE.Quaternion().setFromAxisAngle(
+          targetState.baseMoveDirection,
+          angle
+        )
+        cone.applyQuaternion(rotationQuaternion)
+      }
+      if (keyState.KeyW) {
+        if (targetState.moveSpeed < targetState.maxMoveSpeed) {
+          targetState.moveSpeed += targetState.maxMoveSpeed * deltaTime
+        } else {
+          targetState.moveSpeed = targetState.maxMoveSpeed
+        }
+      } else {
+        if (targetState.moveSpeed > 0) {
+          targetState.moveSpeed = Math.max(
+            0,
+            targetState.moveSpeed - targetState.maxMoveSpeed * deltaTime
+          )
+        }
+      }
+      cone.getWorldQuaternion(currentQuaternion)
+      currentMoveDirection = currentMoveDirection
+        .copy(targetState.baseMoveDirection)
+        .applyQuaternion(currentQuaternion)
+        .normalize()
+      const velocity = currentMoveDirection.multiplyScalar(
+        targetState.moveSpeed
       )
-      // update the position of cone
-      const deltaPosition = targetState.velocity
-        .clone()
-        .multiplyScalar(deltaTime)
-      targetGroup.position.add(deltaPosition)
-
+      const deltaPosition = velocity.multiplyScalar(deltaTime)
+      thirdPersonGroup.position.add(deltaPosition)
       animationId = requestAnimationFrame(animate)
       controls && controls.update()
-      renderer.render(scene, debugConfig.useCamera2 ? camera2! : camera)
+      renderer.render(
+        scene,
+        debugConfig.usedebugCamera
+          ? debugCamera!
+          : targetState.viewMode === 'thirdPerson'
+            ? thirdPersonCamera
+            : firstPersonCamera
+      )
     }
     /*
      * Helper
@@ -333,8 +318,8 @@ export default {
     gridHelper.position.set(0, 0.2, 0)
     // CameraHelper
     let cameraHelper: THREE.CameraHelper | undefined
-    if (debugConfig.useCamera2) {
-      cameraHelper = new THREE.CameraHelper(camera)
+    if (debugConfig.usedebugCamera) {
+      cameraHelper = new THREE.CameraHelper(thirdPersonCamera)
       scene.add(cameraHelper)
     }
     /*
@@ -342,7 +327,7 @@ export default {
      */
     const gui = new GUI()
     const debugFolder = gui.addFolder('Debug')
-    debugFolder.add(debugConfig, 'useCamera2')
+    debugFolder.add(debugConfig, 'usedebugCamera')
     debugFolder.add(debugConfig, 'useControls').onChange((value) => {
       if (value) {
         createControls()
@@ -351,23 +336,29 @@ export default {
         controls = undefined
       }
     })
+    const viewModeFolder = gui.addFolder('Camera')
+    viewModeFolder
+      .add(targetState, 'viewMode')
+      .options({ 第三人称: 'thirdPerson', 第一人称: 'firstPerson' })
     const coneFolder = gui.addFolder('Cone')
     coneFolder
-      .add(targetState.velocity, 'z')
-      .name('速度Z')
+      .add(targetState, 'maxMoveSpeed')
+      .name('最大直线移动速度')
       .min(0)
       .max(10)
       .step(0.1)
-      .onChange(() => {
-        console.log('targetState.velocity', targetState.velocity)
-      })
-    coneFolder.add(cone.rotation, 'x').min(-Math.PI).max(Math.PI).step(0.1)
-    coneFolder.add(cone.rotation, 'y').min(-Math.PI).max(Math.PI).step(0.1)
-    coneFolder.add(cone.rotation, 'z').min(-Math.PI).max(Math.PI).step(0.1)
-    const cameraFolder = gui.addFolder('Camera')
-    cameraFolder.add(camera.position, 'x').min(-10).max(10).step(0.1)
-    cameraFolder.add(camera.position, 'y').min(-10).max(10).step(0.1)
-    cameraFolder.add(camera.position, 'z').min(-10).max(10).step(0.1)
+    coneFolder.add(targetState, 'moveSpeed').name('直线移动速度').listen()
+    coneFolder
+      .add(targetState, 'rotationSpeed')
+      .name('旋转速度')
+      .min(0)
+      .max(10)
+      .step(0.1)
+    const cameraFolder = gui.addFolder('第三人称相机')
+    cameraFolder.add(thirdPersonCamera.position, 'x').min(-10).max(10).step(0.1)
+    cameraFolder.add(thirdPersonCamera.position, 'y').min(-10).max(10).step(0.1)
+    cameraFolder.add(thirdPersonCamera.position, 'z').min(-10).max(10).step(0.1)
+
     /*
      * Dispose
      */
