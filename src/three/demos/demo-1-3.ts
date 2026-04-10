@@ -237,7 +237,7 @@ export default {
       }
     }
     window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('click', () => {
+    renderer.domElement.addEventListener('click', () => {
       targetState.useMouse = !targetState.useMouse
     })
     /*
