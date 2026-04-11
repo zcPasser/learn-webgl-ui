@@ -231,8 +231,8 @@ export default {
 
     const handleMouseMove = (event: MouseEvent) => {
       if (targetState.useMouse) {
-        thirdPersonCamera.rotation.y -= event.movementX / 600
-        thirdPersonCamera.rotation.x -= event.movementY / 600
+        thirdPersonCamera.rotation.y += event.movementX / 600
+        thirdPersonCamera.rotation.x += event.movementY / 600
         return
       }
     }
