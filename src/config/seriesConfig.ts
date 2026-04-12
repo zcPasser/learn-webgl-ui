@@ -43,6 +43,15 @@ export const seriesList: Series[] = [
         noteLink:
           'https://www.yuque.com/passer-l28xu/pf100o/egr16asrgk2lyhsu/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
         demoLink: '/demo/1-3'
+      },
+      {
+        id: '1-4',
+        title: '纹理应用与动态材质系统',
+        content:
+          '一个交互式材质展示台，让一个3D物体（比如一个复杂的模型或一组几何体）能够展示多种纹理效果，用户可以通过UI切换不同的纹理模式',
+        noteLink:
+          'https://www.yuque.com/passer-l28xu/pf100o/bg5pp5x7a46u5ui4/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
+        demoLink: '/demo/1-4'
       }
     ]
   },

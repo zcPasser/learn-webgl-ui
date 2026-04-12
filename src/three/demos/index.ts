@@ -1,9 +1,11 @@
 import type { Scene, Camera, WebGLRenderer } from 'three'
-import { DelHTMLAttributes } from 'vue'
 
 export interface DemoModule {
   title?: string
-  setup: (container: HTMLElement) => {
+  setup: (
+    container: HTMLElement,
+    loadingOverlay?: HTMLElement
+  ) => {
     scene: Scene
     camera: Camera
     renderer: WebGLRenderer
@@ -11,10 +13,17 @@ export interface DemoModule {
     dispose?: () => void
   }
 }
+// 自动导入所有 Demo 模块
+const demoModules = import.meta.glob<{ default: DemoModule }>('./demo-*.ts')
 
-export const demos: Record<string, () => Promise<{ default: DemoModule }>> = {
-  '1-1': () => import('./demo-1-1'),
-  '1-2': () => import('./demo-1-2'),
-  '1-3': () => import('./demo-1-3')
-  // 后续可以继续添加更多 Demo
-}
+console.log('demoModules', demoModules)
+
+export const demos: Record<string, () => Promise<{ default: DemoModule }>> =
+  Object.fromEntries(
+    Object.entries(demoModules)
+      .filter(([path]) => path.match(/demo-\d+-\d+\.ts$/))
+      .map(([path, loader]) => {
+        const demoId = path.match(/demo-(\d+-\d+)\.ts/)?.[1] || ''
+        return [demoId, loader]
+      })
+  )

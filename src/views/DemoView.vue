@@ -1,5 +1,6 @@
 <template>
   <div class="demo-view">
+    <div ref="loadingOverlay"></div>
     <div ref="canvasContainer" class="canvas-container"></div>
     <div v-if="error" class="error-message">
       <el-alert :title="error" type="error" :closable="false" />
@@ -19,6 +20,7 @@ const demoId = route.params.demoId as string
 console.log('demoId', demoId)
 const demoTitle = ref('加载中...')
 const canvasContainer = ref<HTMLDivElement>()
+const loadingOverlay = ref<HTMLDivElement>()
 let sceneManager: SceneManager | null = null
 let demoModule: any = null
 let demoControls: any = null
@@ -37,7 +39,10 @@ const initDemo = async () => {
     demoModule = await demoLoader().then((module) => module.default)
     demoTitle.value = demoModule.title || `Demo ${demoId}`
 
-    demoControls = await demoModule.setup(canvasContainer.value)
+    demoControls = await demoModule.setup(
+      canvasContainer.value,
+      loadingOverlay.value
+    )
 
     if (demoControls?.animate) {
       demoControls.animate()
