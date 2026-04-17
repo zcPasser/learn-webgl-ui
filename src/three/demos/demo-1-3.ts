@@ -7,7 +7,11 @@ import groundNormalMap from '@/assets/sparse_grass/sparse_grass_nor_gl_1k.jpg'
 
 export default {
   title: '相机控制',
-  setup: (container: HTMLCanvasElement, loadingOverlay: HTMLElement) => {
+  setup: (
+    container: HTMLCanvasElement,
+    loadingOverlay: HTMLElement,
+    updateProgressBar: (progress: number) => void
+  ) => {
     /*
      * Debug Config
      */

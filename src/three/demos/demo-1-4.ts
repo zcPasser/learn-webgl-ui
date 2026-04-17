@@ -4,7 +4,11 @@ import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 
 export default {
   title: '纹理应用与动态材质系统',
-  setup: (container: HTMLCanvasElement) => {
+  setup: (
+    container: HTMLElement,
+    loadingOverlay: HTMLElement,
+    updateProgressBar: (progress: number) => void
+  ) => {
     /*
      * State
      */
@@ -48,10 +52,39 @@ export default {
       texture.wrapS = THREE.RepeatWrapping
       texture.wrapT = THREE.RepeatWrapping
       texture.repeat.set(repeatX, repeatY)
+
+      texture.minFilter = THREE.LinearFilter
+      texture.magFilter = THREE.LinearFilter
+      console.log(texture.minFilter, texture.magFilter)
+      console.log(THREE.LinearFilter)
     }
     const loadingManager = new THREE.LoadingManager()
+    loadingManager.onProgress = (url, loaded, total) => {
+      // console.log('loading texture', url, loaded, total)
+      const progress = (loaded / total) * 100
+      updateProgressBar(progress)
+    }
     loadingManager.onLoad = () => {
       console.log('all textures loaded')
+
+      // 检查 canvas 元素
+      console.log('Canvas element:', renderer.domElement)
+      console.log(
+        'Canvas pointer-events:',
+        getComputedStyle(renderer.domElement).pointerEvents
+      )
+      console.log(
+        'Container pointer-events:',
+        getComputedStyle(container).pointerEvents
+      )
+
+      // 测试 OrbitControls 状态
+      console.log('OrbitControls enabled:', orbitControls.enabled)
+      if (loadingOverlay) {
+        // loadingOverlay.style.display = 'none'
+        orbitControls.dispose() // 先清理旧的事件监听
+        updateProgressBar(100)
+      }
       renderer.render(scene, camera)
     }
 

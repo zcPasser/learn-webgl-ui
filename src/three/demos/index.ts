@@ -9,6 +9,7 @@ export interface DemoModule {
     scene: Scene
     camera: Camera
     renderer: WebGLRenderer
+    useLoading?: boolean
     animate?: (deltaTime: number, currentTime: number) => void
     dispose?: () => void
   }
