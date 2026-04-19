@@ -1,14 +1,13 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
+import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js'
+import vertexShader from '@/shaders/demos/demo-1-4/vertex.glsl'
+import fragmentShader from '@/shaders/demos/demo-1-4/fragment.glsl'
 
 export default {
   title: '纹理应用与动态材质系统',
-  setup: (
-    container: HTMLElement,
-    loadingOverlay: HTMLElement,
-    updateProgressBar: (progress: number) => void
-  ) => {
+  setup: (container: HTMLElement) => {
     /*
      * State
      */
@@ -19,7 +18,81 @@ export default {
     /*
      * GUI State
      */
-    const guiState = {}
+    const guiState = {
+      texture: {
+        speedX: 0.01,
+        speedY: 0.01,
+        useU: true,
+        useV: false,
+        uMixFactor: 0.5
+      }
+    }
+    /*
+     * Loader
+     */
+    const createLoader = () => {
+      const loaderContainer = document.createElement('div')
+      loaderContainer.className = 'loader-container'
+      loaderContainer.style = `
+        width: 100vw;
+        min-height: 100vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 1);
+        opacity: 1;
+        transition: opacity 0.6s ease-in-out;
+      `
+      // loader progress bar container
+      const loaderProgressBarContainer = document.createElement('div')
+      loaderProgressBarContainer.className = 'loader-progress-bar-container'
+      loaderContainer.appendChild(loaderProgressBarContainer)
+      loaderProgressBarContainer.style = `
+        width: 80%;
+        height: 40px;
+        border-radius: 20px;
+        background: aliceblue;
+        will-change: contents;
+        transform: translateZ(0);
+        transition: opacity 0.3s ease-in-out, transform 0.4s ease-in-out;
+      `
+
+      // loader progress bar
+      const loaderProgressBar = document.createElement('div')
+      loaderProgressBar.className = 'loader-progress-bar'
+      loaderProgressBarContainer.appendChild(loaderProgressBar)
+      loaderProgressBar.style = `
+        width: 0%;
+        height: inherit;
+        border-radius: 25px;
+        background: cornflowerblue;
+        transition: width 1s ease-in-out;
+        will-change: width, transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+      `
+
+      // loader animation
+      const hideLoader = () => {
+        setTimeout(() => {
+          loaderContainer.style.opacity = '0'
+          setTimeout(() => {
+            loaderContainer.style.display = 'none'
+          }, 600)
+        }, 1100)
+      }
+      return {
+        container: loaderContainer,
+        progress: loaderProgressBar,
+        hideLoader
+      }
+    }
+    const loader = createLoader()
     /*
      * Init: Scene, Camera, Renderer
      */
@@ -31,7 +104,7 @@ export default {
       1000
     )
     scene.add(camera)
-    camera.position.set(1, 1, 2.0)
+    camera.position.set(-0.29, 1, 4.14)
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(container.clientWidth, container.clientHeight)
     container.appendChild(renderer.domElement)
@@ -55,48 +128,23 @@ export default {
 
       texture.minFilter = THREE.LinearFilter
       texture.magFilter = THREE.LinearFilter
-      console.log(texture.minFilter, texture.magFilter)
-      console.log(THREE.LinearFilter)
     }
     const loadingManager = new THREE.LoadingManager()
     loadingManager.onProgress = (url, loaded, total) => {
-      // console.log('loading texture', url, loaded, total)
-      const progress = (loaded / total) * 100
-      updateProgressBar(progress)
+      const progress = (loaded / total) * 95
+      loader.progress.style.width = `${progress}%`
     }
     loadingManager.onLoad = () => {
       console.log('all textures loaded')
+      loader.progress.style.width = '100%'
+      loader.hideLoader()
 
-      // 检查 canvas 元素
-      console.log('Canvas element:', renderer.domElement)
-      console.log(
-        'Canvas pointer-events:',
-        getComputedStyle(renderer.domElement).pointerEvents
-      )
-      console.log(
-        'Container pointer-events:',
-        getComputedStyle(container).pointerEvents
-      )
-
-      // 测试 OrbitControls 状态
-      console.log('OrbitControls enabled:', orbitControls.enabled)
-      if (loadingOverlay) {
-        // loadingOverlay.style.display = 'none'
-        orbitControls.dispose() // 先清理旧的事件监听
-        updateProgressBar(100)
-      }
       renderer.render(scene, camera)
     }
-
     const textureLoader = new THREE.TextureLoader(loadingManager)
     const colorTexture = textureLoader.load(
       '/src/assets/red_brick_1k/red_brick_diff_1k.jpg',
-      () => {
-        console.log('loaded red_brick_diff_1k')
-        // material.map = colorTexture
-        // material.needsUpdate = true
-        renderer.render(scene, camera)
-      },
+      () => {},
       undefined,
       (error) => {
         console.log('error load red_brick_diff_1k', error)
@@ -106,8 +154,6 @@ export default {
       '/src/assets/red_brick_1k/red_brick_nor_dx_1k.jpg',
       () => {
         console.log('loaded red_brick_normal_1k')
-        // material.normalMap = normalTexture
-        // material.needsUpdate = true
       },
       undefined,
       (error) => {
@@ -118,8 +164,6 @@ export default {
       '/src/assets/red_brick_1k/red_brick_rough_1k.jpg',
       () => {
         console.log('loaded red_brick_rough_1k')
-        // material.roughnessMap = roughTexture
-        // material.needsUpdate = true
       },
       undefined,
       (error) => {
@@ -138,6 +182,46 @@ export default {
     material.map = colorTexture
     material.normalMap = normalTexture
     material.roughnessMap = roughTexture
+    // skybox
+    const hdrLoader = new HDRLoader(loadingManager)
+    hdrLoader.load(
+      '/src/assets/skybox/lilienstein_1k.hdr',
+      (texture) => {
+        texture.mapping = THREE.EquirectangularReflectionMapping
+        scene.background = texture
+        scene.environment = texture
+      },
+      undefined,
+      (error) => {
+        console.log('error load skybox', error)
+      }
+    )
+    // multi texture
+    const colorTexture2 = textureLoader.load(
+      '/src/assets/coast_sand_rocks_02_1k/textures/coast_sand_rocks_02_diff_1k.jpg',
+      () => {
+        console.log('loaded uv_grid_opengl')
+      },
+      undefined,
+      (error) => {
+        console.log('error load uv_grid_opengl', error)
+      }
+    )
+    setTextureRepeat(colorTexture2, state.repeatX, state.repeatY)
+    const shaderMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uTexture1: { value: colorTexture },
+        uTexture2: { value: colorTexture2 },
+        uMixFactor: { value: guiState.texture.uMixFactor },
+        uOffset1: { value: new THREE.Vector2(0, 0) },
+        uOffset2: { value: new THREE.Vector2(0, 0) }
+      },
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader
+    })
+    const mesh2 = new THREE.Mesh(geometry, shaderMaterial)
+    scene.add(mesh2)
+    mesh2.position.x = -3
     /*
      * Light: AmbientLight
      */
@@ -170,12 +254,31 @@ export default {
     const clock = new THREE.Clock()
     let lastTime = clock.getElapsedTime()
     let animateId: number
+    // colorTexture.wrapS = THREE.ClampToEdgeWrapping
+    const textureAnimation = () => {
+      if (guiState.texture.useU) {
+        colorTexture.offset.x += guiState.texture.speedX
+        normalTexture.offset.x += guiState.texture.speedX
+        roughTexture.offset.x += guiState.texture.speedX
+        shaderMaterial.uniforms.uOffset1.value.x = colorTexture.offset.x
+        shaderMaterial.uniforms.uOffset2.value.x = colorTexture2.offset.x
+      }
+      if (guiState.texture.useV) {
+        colorTexture.offset.y += guiState.texture.speedY
+        normalTexture.offset.y += guiState.texture.speedY
+        roughTexture.offset.y += guiState.texture.speedY
+        shaderMaterial.uniforms.uOffset1.value.y = colorTexture.offset.y
+        shaderMaterial.uniforms.uOffset2.value.y = colorTexture2.offset.y
+      }
+      // colorTexture.offset.y += 0.01
+    }
     const animate = () => {
       animateId = requestAnimationFrame(animate)
       // time
       const currentTime = clock.getElapsedTime()
       const deltaTime = currentTime - lastTime
       // algorithm
+      textureAnimation()
       // update
       orbitControls.update()
       renderer.render(scene, camera)
@@ -189,6 +292,20 @@ export default {
     cameraFolder.add(camera.position, 'x').min(-5).max(5).step(0.01)
     cameraFolder.add(camera.position, 'y').min(-5).max(5).step(0.01)
     cameraFolder.add(camera.position, 'z').min(-5).max(5).step(0.01)
+    const textureFolder = gui.addFolder('Texture')
+    textureFolder.add(guiState.texture, 'useU')
+    textureFolder.add(guiState.texture, 'useV')
+    textureFolder.add(guiState.texture, 'speedX').min(0.01).max(0.1).step(0.01)
+    textureFolder.add(guiState.texture, 'speedY').min(0.01).max(0.1).step(0.01)
+    textureFolder
+      .add(guiState.texture, 'uMixFactor')
+      .min(0.0)
+      .max(1)
+      .step(0.01)
+      .onChange((value) => {
+        shaderMaterial.uniforms.uMixFactor.value = value
+      })
+
     /*
      * Dispose
      */
@@ -200,7 +317,8 @@ export default {
     }
     return {
       animate,
-      dispose
+      dispose,
+      loader
     }
   }
 }
