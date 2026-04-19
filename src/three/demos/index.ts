@@ -12,6 +12,7 @@ export interface DemoModule {
     useLoading?: boolean
     animate?: (deltaTime: number, currentTime: number) => void
     dispose?: () => void
+    loader?: HTMLElement | null
   }
 }
 // 自动导入所有 Demo 模块

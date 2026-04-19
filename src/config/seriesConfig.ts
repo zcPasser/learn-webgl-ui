@@ -16,7 +16,7 @@ export interface Series {
 export const seriesList: Series[] = [
   {
     id: '1',
-    title: 'github项目',
+    title: '单元练习',
     description: '从零开始学习 Three.js，掌握 3D 图形编程的基本概念和技术',
     items: [
       {
