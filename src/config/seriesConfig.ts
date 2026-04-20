@@ -31,7 +31,7 @@ export const seriesList: Series[] = [
         id: '1-2',
         title: '光照实验',
         content:
-          '多种光源，多种材质，光源位置动态变化，实现阴影效果，添加 GUI 控制光照参数',
+          '多种光源，多种材质，光源位置动态变化，实现阴影效果，文本标签，添加 GUI 控制光照参数',
         noteLink:
           'https://www.yuque.com/passer-l28xu/pf100o/kno0aksw7rxig6z8/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
         demoLink: '/demo/1-2'
@@ -48,7 +48,7 @@ export const seriesList: Series[] = [
         id: '1-4',
         title: '纹理应用与动态材质系统',
         content:
-          '一个交互式材质展示台，让一个3D物体（比如一个复杂的模型或一组几何体）能够展示多种纹理效果，用户可以通过UI切换不同的纹理模式',
+          '加载进度管理，纹理动画，天空盒，纹理混合，shader，文本标签，GUI操控',
         noteLink:
           'https://www.yuque.com/passer-l28xu/pf100o/bg5pp5x7a46u5ui4/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
         demoLink: '/demo/1-4'

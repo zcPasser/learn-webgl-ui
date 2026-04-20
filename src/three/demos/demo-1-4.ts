@@ -4,6 +4,7 @@ import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js'
 import vertexShader from '@/shaders/demos/demo-1-4/vertex.glsl'
 import fragmentShader from '@/shaders/demos/demo-1-4/fragment.glsl'
+import { createPlainText } from '@/three/utils/textUtil'
 
 export default {
   title: '纹理应用与动态材质系统',
@@ -173,12 +174,42 @@ export default {
     setTextureRepeat(colorTexture, state.repeatX, state.repeatY)
     setTextureRepeat(normalTexture, state.repeatX, state.repeatY)
     setTextureRepeat(roughTexture, state.repeatX, state.repeatY)
+    // text label
+    const createTextLabel = (text: string) => {
+      const canvas = createPlainText(text)
+
+      // 创建纹理
+      const texture = new THREE.CanvasTexture(canvas)
+      texture.minFilter = THREE.LinearFilter
+      texture.magFilter = THREE.LinearFilter
+      texture.needsUpdate = true
+
+      canvas.remove()
+
+      // 创建材质
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true
+      })
+
+      // 创建精灵
+      const sprite = new THREE.Sprite(material)
+
+      const aspect = canvas.width / canvas.height
+      const baseScale = 1
+      sprite.scale.set(aspect * baseScale, baseScale, 1) // 调整大小
+
+      return sprite
+    }
     const geometry = new THREE.TorusGeometry(1, 0.4, 16, 100)
     const material = new THREE.MeshStandardMaterial({
       color: 0xffffff
     })
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
+    const textLabel1 = createTextLabel('颜色&法线&粗糙贴图')
+    mesh.add(textLabel1)
+    textLabel1.position.y = 2
     material.map = colorTexture
     material.normalMap = normalTexture
     material.roughnessMap = roughTexture
@@ -222,6 +253,9 @@ export default {
     const mesh2 = new THREE.Mesh(geometry, shaderMaterial)
     scene.add(mesh2)
     mesh2.position.x = -3
+    const textLabel2 = createTextLabel('多纹理，双颜色贴图')
+    mesh2.add(textLabel2)
+    textLabel2.position.y = 2
     /*
      * Light: AmbientLight
      */
@@ -249,6 +283,17 @@ export default {
     const pointLightHelper = new THREE.PointLightHelper(pointLight, 1)
     scene.add(pointLightHelper)
     /*
+     * Events
+     */
+    // resize
+    const handleReisze = () => {
+      camera.aspect = window.innerWidth / window.innerHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(window.innerWidth, window.innerHeight)
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    }
+    window.addEventListener('resize', handleReisze)
+    /*
      * Animation
      */
     const clock = new THREE.Clock()
@@ -270,7 +315,6 @@ export default {
         shaderMaterial.uniforms.uOffset1.value.y = colorTexture.offset.y
         shaderMaterial.uniforms.uOffset2.value.y = colorTexture2.offset.y
       }
-      // colorTexture.offset.y += 0.01
     }
     const animate = () => {
       animateId = requestAnimationFrame(animate)
