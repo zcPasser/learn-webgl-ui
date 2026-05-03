@@ -52,6 +52,15 @@ export const seriesList: Series[] = [
         noteLink:
           'https://www.yuque.com/passer-l28xu/pf100o/bg5pp5x7a46u5ui4/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
         demoLink: '/demo/1-4'
+      },
+      {
+        id: '1-5',
+        title: '模型加载与动画系统',
+        content:
+          '加载 GLTF 模型，播放模型动画，实现模型的交互（点击、悬停），添加模型的后处理效果',
+        noteLink:
+          'https://www.yuque.com/passer-l28xu/pf100o/hh261g1l62vtbkzd/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
+        demoLink: '/demo/1-5'
       }
     ]
   },
