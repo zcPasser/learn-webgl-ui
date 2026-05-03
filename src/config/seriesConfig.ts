@@ -61,6 +61,13 @@ export const seriesList: Series[] = [
         noteLink:
           'https://www.yuque.com/passer-l28xu/pf100o/hh261g1l62vtbkzd/edit?toc_node_uuid=icuGhVPZMv9eY7wW',
         demoLink: '/demo/1-5'
+      },
+      {
+        id: '1-6',
+        title: '物理模拟',
+        content: '重力模拟，碰撞检测，弹性效果，约束系统',
+        noteLink: 'https://www.yuque.com/passer-l28xu/pf100o/pc3zggvw0z0z2q6g',
+        demoLink: '/demo/1-6'
       }
     ]
   },
