@@ -410,6 +410,9 @@ export default {
         sceneState.modelState.previousStateAction.stop()
         sceneState.modelState.previousStateAction = null
       }
+      if (composer) {
+        composer.dispose()
+      }
     }
 
     return {
