@@ -108,8 +108,8 @@ export default {
     container.appendChild(memoryMonitorElement)
 
     const updateMemoryInfo = () => {
-      if (performance && performance.memory) {
-        const memory = performance.memory
+      if (performance && (performance as any).memory) {
+        const memory = (performance as any).memory
         const usedJSHeapSize = (memory.usedJSHeapSize / 1048576).toFixed(2)
         const totalJSHeapSize = (memory.totalJSHeapSize / 1048576).toFixed(2)
         const jsHeapSizeLimit = (memory.jsHeapSizeLimit / 1048576).toFixed(2)

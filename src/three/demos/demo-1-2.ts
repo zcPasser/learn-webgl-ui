@@ -221,15 +221,15 @@ export default {
       1
     )
     scene.add(directionalLightHelper)
-    const directionalLightShadowHelper = new THREE.CameraHelper(
-      directionalLight.shadow.camera
-    )
+    // const directionalLightShadowHelper = new THREE.CameraHelper(
+    //   directionalLight.shadow.camera
+    // )
     // scene.add(directionalLightShadowHelper)
-    const pointLightHelper = new THREE.PointLightHelper(bulbLight, 1)
+    // const pointLightHelper = new THREE.PointLightHelper(bulbLight, 1)
     // scene.add(pointLightHelper)
-    const pointLightShadowHelper = new THREE.CameraHelper(
-      bulbLight.shadow.camera
-    )
+    // const pointLightShadowHelper = new THREE.CameraHelper(
+    //   bulbLight.shadow.camera
+    // )
     // scene.add(pointLightShadowHelper)
     const axesHelper = new THREE.AxesHelper(5)
     scene.add(axesHelper)

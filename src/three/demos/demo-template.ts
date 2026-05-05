@@ -15,11 +15,11 @@ export default {
     /*
      * GUI Config
      */
-    const guiConfig = {
-      ground: {
-        color: 0x666b66
-      }
-    }
+    // const guiConfig = {
+    //   ground: {
+    //     color: 0x666b66
+    //   }
+    // }
     /*
      * Scene + Camera + Renderer
      */
@@ -78,7 +78,7 @@ export default {
     /*
      * Event
      */
-    const handleKeydown = (event: KeyboardEvent) => {
+    const handleKeydown = (_event: KeyboardEvent) => {
       // if (event.key === 'w') {
       //   camera.position.z += 1
       // } else if (event.key === 's') {
@@ -98,7 +98,7 @@ export default {
      * Animation
      */
     let animationId: number | undefined = undefined
-    const animate = (elapsedTime: number) => {
+    const animate = () => {
       // console.log(elapsedTime)
       animationId = requestAnimationFrame(animate)
       controls.update()

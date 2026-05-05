@@ -131,7 +131,7 @@ export default {
       texture.magFilter = THREE.LinearFilter
     }
     const loadingManager = new THREE.LoadingManager()
-    loadingManager.onProgress = (url, loaded, total) => {
+    loadingManager.onProgress = (_url, loaded, total) => {
       const progress = (loaded / total) * 95
       loader.progress.style.width = `${progress}%`
     }
@@ -320,7 +320,7 @@ export default {
       animateId = requestAnimationFrame(animate)
       // time
       const currentTime = clock.getElapsedTime()
-      const deltaTime = currentTime - lastTime
+      // const deltaTime = currentTime - lastTime
       // algorithm
       textureAnimation()
       // update

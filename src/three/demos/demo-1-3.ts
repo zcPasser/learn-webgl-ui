@@ -8,9 +8,9 @@ import groundNormalMap from '@/assets/sparse_grass/sparse_grass_nor_gl_1k.jpg'
 export default {
   title: '相机控制',
   setup: (
-    container: HTMLCanvasElement,
-    loadingOverlay: HTMLElement,
-    updateProgressBar: (progress: number) => void
+    container: HTMLCanvasElement
+    // loadingOverlay: HTMLElement,
+    // updateProgressBar: (progress: number) => void
   ) => {
     /*
      * Debug Config
@@ -77,7 +77,7 @@ export default {
     const colorMap = loader.load(
       groundColorMap,
       (texture) => {
-        console.log('colorMap load success')
+        console.log('colorMap load success', texture)
       },
       undefined,
       (err) => {
@@ -91,7 +91,7 @@ export default {
     const normalMap = loader.load(
       groundNormalMap,
       (texture) => {
-        console.log('normalMap load success')
+        console.log('normalMap load success', texture)
       },
       undefined,
       (err) => {

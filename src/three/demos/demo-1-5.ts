@@ -1,15 +1,10 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
-import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js'
-import vertexShader from '@/shaders/demos/demo-1-4/vertex.glsl'
-import fragmentShader from '@/shaders/demos/demo-1-4/fragment.glsl'
-import { createPlainText } from '@/three/utils/textUtil'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { fadeToAction } from '../utils/animationUtil'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
 
 export default {
