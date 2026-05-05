@@ -296,8 +296,8 @@ export default {
     /*
      * Animation
      */
-    const clock = new THREE.Clock()
-    let lastTime = clock.getElapsedTime()
+    // const clock = new THREE.Clock()
+    // let lastTime = clock.getElapsedTime()
     let animateId: number
     // colorTexture.wrapS = THREE.ClampToEdgeWrapping
     const textureAnimation = () => {
@@ -319,14 +319,14 @@ export default {
     const animate = () => {
       animateId = requestAnimationFrame(animate)
       // time
-      const currentTime = clock.getElapsedTime()
+      // const currentTime = clock.getElapsedTime()
       // const deltaTime = currentTime - lastTime
       // algorithm
       textureAnimation()
       // update
       orbitControls.update()
       renderer.render(scene, camera)
-      lastTime = currentTime
+      // lastTime = currentTime
     }
     /*
      * GUI

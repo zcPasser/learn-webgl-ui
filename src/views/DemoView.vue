@@ -10,7 +10,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
-import { SceneManager } from '@/three/core/SceneManager'
+// import { SceneManager } from '@/three/core/SceneManager'
 import { demos } from '@/three/demos'
 
 const route = useRoute()
