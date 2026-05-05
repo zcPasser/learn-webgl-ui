@@ -6,6 +6,7 @@ import { fadeToAction } from '../utils/animationUtil'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass.js'
+import robotExpressiveUrl from '@/assets/models/RobotExpressive.glb?url'
 
 export default {
   title: '模型加载与动画系统',
@@ -74,9 +75,7 @@ export default {
      * Load Model
      */
     const gltfLoader = new GLTFLoader()
-    const gltf = await gltfLoader.loadAsync(
-      '/src/assets/models/RobotExpressive.glb'
-    )
+    const gltf = await gltfLoader.loadAsync(robotExpressiveUrl)
     sceneState.modelState.model = gltf.scene
     sceneState.modelState.model.scale.set(0.5, 0.5, 0.5)
     scene.add(sceneState.modelState.model)

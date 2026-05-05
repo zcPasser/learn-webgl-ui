@@ -1,6 +1,8 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js'
+import redBrickDiffUrl from '@/assets/red_brick_1k/red_brick_diff_1k.jpg?url'
+
 export default {
   title: '物理模拟',
   setup: async (container: HTMLElement) => {
@@ -54,9 +56,7 @@ export default {
     renderer.domElement.addEventListener('resize', handleResize)
     // plane
     const textureLoader = new THREE.TextureLoader()
-    const texture = await textureLoader.loadAsync(
-      '/src/assets/red_brick_1k/red_brick_diff_1k.jpg'
-    )
+    const texture = await textureLoader.loadAsync(redBrickDiffUrl)
     texture.wrapS = THREE.RepeatWrapping
     texture.wrapT = THREE.RepeatWrapping
     texture.repeat.set(10, 10)

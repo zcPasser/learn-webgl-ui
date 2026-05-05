@@ -5,6 +5,11 @@ import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js'
 import vertexShader from '@/shaders/demos/demo-1-4/vertex.glsl'
 import fragmentShader from '@/shaders/demos/demo-1-4/fragment.glsl'
 import { createPlainText } from '@/three/utils/textUtil'
+import redBrickDiffUrl from '@/assets/red_brick_1k/red_brick_diff_1k.jpg?url'
+import redBrickNorUrl from '@/assets/red_brick_1k/red_brick_nor_dx_1k.jpg?url'
+import redBrickRoughUrl from '@/assets/red_brick_1k/red_brick_rough_1k.jpg?url'
+import skyboxHdrUrl from '@/assets/skybox/lilienstein_1k.hdr?url'
+import coastSandDiffUrl from '@/assets/coast_sand_rocks_02_1k/textures/coast_sand_rocks_02_diff_1k.jpg?url'
 
 export default {
   title: '纹理应用与动态材质系统',
@@ -144,7 +149,7 @@ export default {
     }
     const textureLoader = new THREE.TextureLoader(loadingManager)
     const colorTexture = textureLoader.load(
-      '/src/assets/red_brick_1k/red_brick_diff_1k.jpg',
+      redBrickDiffUrl,
       () => {},
       undefined,
       (error) => {
@@ -152,7 +157,7 @@ export default {
       }
     )
     const normalTexture = textureLoader.load(
-      '/src/assets/red_brick_1k/red_brick_nor_dx_1k.jpg',
+      redBrickNorUrl,
       () => {
         console.log('loaded red_brick_normal_1k')
       },
@@ -162,7 +167,7 @@ export default {
       }
     )
     const roughTexture = textureLoader.load(
-      '/src/assets/red_brick_1k/red_brick_rough_1k.jpg',
+      redBrickRoughUrl,
       () => {
         console.log('loaded red_brick_rough_1k')
       },
@@ -216,7 +221,7 @@ export default {
     // skybox
     const hdrLoader = new HDRLoader(loadingManager)
     hdrLoader.load(
-      '/src/assets/skybox/lilienstein_1k.hdr',
+      skyboxHdrUrl,
       (texture) => {
         texture.mapping = THREE.EquirectangularReflectionMapping
         scene.background = texture
@@ -229,7 +234,7 @@ export default {
     )
     // multi texture
     const colorTexture2 = textureLoader.load(
-      '/src/assets/coast_sand_rocks_02_1k/textures/coast_sand_rocks_02_diff_1k.jpg',
+      coastSandDiffUrl,
       () => {
         console.log('loaded uv_grid_opengl')
       },
